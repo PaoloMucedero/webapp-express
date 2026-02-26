@@ -30,9 +30,25 @@ function index(req, res) {
 // SHOW
 function show(req, res) {
     // TEMPORARY DEBUG
-    console.log(`sei sulla rotta show`);
-    res.send("sei sulla rotta show")
+    //console.log(`sei sulla rotta show`);
+    //res.send("sei sulla rotta show")
+
+    // RENDO DISPONIBILE ID con param dinamico
+    const {id} = req.params;
+    // PREPARO LA QUERY
+    const movieSql = "SELECT * FROM movies WHERE id = ?"
+    connection.query(movieSql, [id], (err, results) => {
+        if (err) return res.status(500).json({ error: `Database query failed` });
+        if (results.length === 0) return res.status(404).json({ error: `movie not found`});
+
+        // Uso una variabile per salvare il singolo film
+        const movie = results[0];
+        // ritorno .JSON
+        res.json(movie);
+    })
+
+
 }
 
 // Esporto le rotte
-module.exports = { index, show}
+module.exports = { index, show }
