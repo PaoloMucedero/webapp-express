@@ -4,7 +4,7 @@ const connection = require(`../data/db`);
 // CREO ROTTE 
 
 // INDEX
-function index(req, res) {
+function index(req, res, next) {
     // TEMPORARY DEBUG
     //console.log(`sei sulla rotta index`);
     //res.send("sei sulla rotta index")
@@ -13,12 +13,7 @@ function index(req, res) {
     // ESEGUO LA QUERY
     connection.query(sql, (err, results) => {
 
-        if (err) {
-            console.error("Errore database:", err);
-            return res.status(500).json({
-                error: "Errore del server"
-            });
-        }
+        if (err) return next(err); // All'errore utilizza l'errore del middlewares handleError
 
         res.json(results);
 
@@ -28,7 +23,7 @@ function index(req, res) {
 
 
 // SHOW
-function show(req, res) {
+function show(req, res, next) {
     // TEMPORARY DEBUG
     //console.log(`sei sulla rotta show`);
     //res.send("sei sulla rotta show")
@@ -37,15 +32,29 @@ function show(req, res) {
     const {id} = req.params;
     // PREPARO LA QUERY
     const movieSql = "SELECT * FROM movies WHERE id = ?"
+    const reviewsSql = `SELECT * FROM reviews WHERE movie_id = ?`
+    // CHIAMATA PRINCIPALE PER LIBRO
     connection.query(movieSql, [id], (err, results) => {
-        if (err) return res.status(500).json({ error: `Database query failed` });
+        if (err) return next(err); // All'errore utilizza l'errore del middlewares handleError
         if (results.length === 0) return res.status(404).json({ error: `movie not found`});
 
         // Uso una variabile per salvare il singolo film
         const movie = results[0];
-        // ritorno .JSON
-        res.json(movie);
-    })
+
+        // CHIMATA SECONDARIA PER REVIEW
+        connection.query(reviewsSql, [id], (err, reviewResults) => {
+            if (err) return next(err); // All'errore utilizza l'errore del middlewares handleError
+        
+        // Uso una variabile per salvare il singolo film
+        const movie = results[0];
+        // Uso una variabile per salvare le reviews
+        const review = reviewResults;
+        // Aggiungo prop reviews all'elemento book
+        movie.reviews = reviewsArr;
+            // ritorno .JSON
+            res.json(movie);
+        });
+    });
 
 
 }
