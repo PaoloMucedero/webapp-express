@@ -7,7 +7,7 @@ app.use(express.static("public"));
 
 
 // HOME PAGE
-app.get("/", (req, res) => {
+app.get("/api", (req, res) => {
     res.send("<h1>Home Route webapp completa</h1>")
 })
 
@@ -15,3 +15,14 @@ app.get("/", (req, res) => {
 // IMPORTO MIDDLEWARES
 const errorsHandler = require(`./middlewares/handleError`);
 const notFound = require(`./middlewares/notFoundStatus`)
+// UTILIZZO DEI MIDDLEWARES
+app.use(errorsHandler);
+app.use(notFound);
+
+
+
+// .listen 
+app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`);
+
+})
